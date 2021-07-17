@@ -307,7 +307,7 @@ void CVideo_Software::GetVideoPointer(void* &vptr)
 //----------------------------------------------------------------------------------------------------
 void CVideo_Software::SetVideoPointer(void* vptr,uint32_t line_size)
 {
- VideoBuffer_Ptr=reinterpret_cast<uint32_t*>(vptr);
+ VideoBuffer_Ptr=reinterpret_cast<uint16_t*>(vptr);
  LineSize=line_size;
 }
 
@@ -340,7 +340,7 @@ void CVideo_Software::PutSymbol(int64_t x,int64_t y,char symbol,uint32_t color)
   {
    if (x+xs<0 || x+xs>=ScreenWidth) continue;
    if (y+ys<0 || y+ys>=ScreenHeight) continue;
-   uint32_t *v_ptr=VideoBuffer_Ptr+x+xs+(y+ys)*LineSize;
+   uint16_t *v_ptr=VideoBuffer_Ptr+x+xs+(y+ys)*LineSize;
    if (byte&mask) *v_ptr=color;
   }
  }
@@ -373,7 +373,7 @@ void CVideo_Software::DrawPoint(int64_t x,int64_t y,uint32_t color)
  if (y<0) return;
  if (x>=ScreenWidth) return;
  if (y>=ScreenHeight) return;
- uint32_t *v_ptr=VideoBuffer_Ptr+x+y*LineSize;
+ uint16_t *v_ptr=VideoBuffer_Ptr+x+y*LineSize;
  *v_ptr=color;
 }
 //----------------------------------------------------------------------------------------------------
@@ -473,10 +473,10 @@ void CVideo_Software::FillRectangle(int64_t x1,int64_t y1,int64_t x2,int64_t y2,
  if (y1<0) y1=0;
  if (y2>=ScreenHeight) y2=ScreenHeight-1;
 
- uint32_t *v_ptr=VideoBuffer_Ptr+x1+y1*LineSize;
+ uint16_t *v_ptr=VideoBuffer_Ptr+x1+y1*LineSize;
  for(int64_t y=y1;y<=y2;y++,v_ptr+=LineSize)
  {
-  uint32_t *v_local_ptr=v_ptr;
+  uint16_t *v_local_ptr=v_ptr;
   for(int64_t x=x1;x<=x2;x++,v_local_ptr++) *v_local_ptr=color;
  }
 }
@@ -485,10 +485,10 @@ void CVideo_Software::FillRectangle(int64_t x1,int64_t y1,int64_t x2,int64_t y2,
 //----------------------------------------------------------------------------------------------------
 void CVideo_Software::ClearScreen(uint32_t color)
 {
- uint32_t *v_ptr=VideoBuffer_Ptr;
+ uint16_t *v_ptr=VideoBuffer_Ptr;
  for(int64_t y=0;y<ScreenHeight;y++,v_ptr+=LineSize)
  {
-  uint32_t *v_local_ptr=v_ptr;
+  uint16_t *v_local_ptr=v_ptr;
   for(int64_t x=0;x<ScreenWidth;x++,v_local_ptr++) *v_local_ptr=color;
  }
 }

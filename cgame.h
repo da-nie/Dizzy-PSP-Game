@@ -43,34 +43,39 @@ class CGame
   //-перечисления---------------------------------------------------------------------------------------
   //-структуры------------------------------------------------------------------------------------------
   //-константы------------------------------------------------------------------------------------------
-  static const uint32_t BLACK_COLOR=(0<<24)|(0<<16)|(0<<8)|(0<<0);//чёрный цвет
-  static const uint32_t YELLOW_COLOR=(0<<24)|(255<<16)|(255<<8)|(0<<0);//жёлтый цвет цвет
+  static const uint16_t BLACK_COLOR=(0<<5)|(0<<5)|(0<<0);//чёрный цвет
+  static const uint16_t YELLOW_COLOR=(31<<11)|(63<<5)|(0<<0);//жёлтый цвет
 
-  static const uint32_t SKY_COLOR=(0<<24)|(81<<16)|(162<<8)|(243<<0);//цвет неба
-  static const uint32_t BLEND_COLOR=(00<<24)|(81<<16)|(162<<8)|(243<<0);//прозрачный цвет
-  static const uint8_t BLEND_COLOR_R=81;//прозрачный цвет, компонент R
-  static const uint8_t BLEND_COLOR_G=162;//прозрачный цвет, компонент G
-  static const uint8_t BLEND_COLOR_B=243;//прозрачный цвет, компонент B
+  static const uint8_t BLEND_COLOR_B=81>>3;//прозрачный цвет, компонент R
+  static const uint8_t BLEND_COLOR_G=162>>2;//прозрачный цвет, компонент G
+  static const uint8_t BLEND_COLOR_R=243>>3;//прозрачный цвет, компонент B
+  static const uint16_t SKY_COLOR=(BLEND_COLOR_R<<11)|(BLEND_COLOR_G<<5)|(BLEND_COLOR_B<<0);//цвет неба
+  static const uint16_t BLEND_COLOR=(BLEND_COLOR_R<<11)|(BLEND_COLOR_G<<5)|(BLEND_COLOR_B<<0);//прозрачный цвет
 
-  static const uint32_t NO_BARRIER_COLOR=(0x00<<24)|(0x00<<16)|(0x00<<8)|(0x00<<0);//цвет остутствия препятствий
-  static const uint8_t NO_BARRIER_COLOR_R=0;//цвет отсутствия препятствий, компонент R
+  static const uint8_t NO_BARRIER_COLOR_B=0;//цвет отсутствия препятствий, компонент R
   static const uint8_t NO_BARRIER_COLOR_G=0;//цвет отсутствия препятствий, компонент G
-  static const uint8_t NO_BARRIER_COLOR_B=0;//цвет отсутствия препятствий, компонент B
+  static const uint8_t NO_BARRIER_COLOR_R=0;//цвет отсутствия препятствий, компонент B
+  static const uint16_t NO_BARRIER_COLOR=(NO_BARRIER_COLOR_R<<11)|(NO_BARRIER_COLOR_G<<5)|(NO_BARRIER_COLOR_B<<0);//цвет остутствия препятствий
+
+  static const uint16_t ENERGY_GOOD_COLOR=(8<<11)|(63<<5)|(8<<0);//цвет "отлично"
+  static const uint16_t ENERGY_NORMAL_COLOR=(8<<11)|(63<<5)|(31<<0);//цвет "хорошо"
+  static const uint16_t ENERGY_BAD_COLOR=(8<<11)|(8<<5)|(31<<0);//цвет "плохо"
 
   static const int32_t TILES_ANIMATION_TICK_COUNTER_DIVIDER=7;//делитель такта анимации тайлов
+  static const int32_t FLASH_TICK_COUNTER_DIVIDER=6;//делитель такта для мигания инвентаря
   static const int32_t DIZZY_ANIMATION_TICK_COUNTER_DIVIDER=3;//делитель такта анимации Диззи
   static const int32_t MOVE_TICK_COUNTER_DIVIDER=7;//делитель такта перемещения Диззи
-  
+
   static const int32_t DIZZY_WIDTH=25;//ширина спрайта Диззи
   static const int32_t DIZZY_HEIGHT=22;//высота спрайта Диззи
-    
+
   static const int32_t SCREEN_WIDTH=320;//ширина экрана
   static const int32_t SCREEN_HEIGHT=240;//высота экрана
 
   static const int32_t TILE_WIDTH=16;//ширина тайла
   static const int32_t TILE_HEIGHT=16;//высота тайла
   static const int32_t TILE_BORDER_WIDTH=1;//ширина рамки
-  static const int32_t TILE_BORDER_HEIGHT=1;//высота рамки  
+  static const int32_t TILE_BORDER_HEIGHT=1;//высота рамки
   static const int32_t TILE_WITH_BORDER_WIDTH=TILE_WIDTH+TILE_BORDER_WIDTH+TILE_BORDER_WIDTH;//ширина тайла с рамкой
   static const int32_t TILE_WITH_BORDER_HEIGHT=TILE_HEIGHT+TILE_BORDER_HEIGHT+TILE_BORDER_HEIGHT;//высота тайла с рамкой
 
@@ -86,9 +91,6 @@ class CGame
   //-переменные-----------------------------------------------------------------------------------------
   CDizzy cDizzy;//Диззи
 
-  int32_t Map_X;//координаты левого верхнего угла карты
-  int32_t Map_Y;
-
   CSprite cSprite_Dizzy;//спрайт Диззи
   CSprite cSprite_Frame;//рамки
   CSprite cSprite_ScreenFrame;//рамки для экрана
@@ -96,9 +98,6 @@ class CGame
 
   CSprite cSprite_Tiles;//тайлы
   CSprite cSprite_TilesBarrier;//непроницаемость тайлов
-  
-  int32_t X;//координаты Диззи на экране
-  int32_t Y;
 
   int32_t dX;//скорости Диззи
   int32_t dY;
@@ -109,7 +108,7 @@ class CGame
   int32_t DizzyAnimationTickCounter;//счётчик анимации Диззи
   int32_t FlashTickCounter;//счётчик мигания надписи в инвентаре
   int32_t MoveTickCounter;//счётчик перемещения Диззи
-  
+
   std::shared_ptr<CFontPrinter> cFontPrinter_Ptr;//указатель на класс работы со шрифтами
 
   CGameState cGameState;//состояние игры
@@ -122,11 +121,11 @@ class CGame
   ~CGame();
  public:
   //-открытые функции-----------------------------------------------------------------------------------
-  void OnTimer(bool left,bool right,bool up,bool down,bool fire,IVideo *iVideo_Ptr);//обработка таймера  
+  bool OnTimer(bool left,bool right,bool up,bool down,bool fire,IVideo *iVideo_Ptr);//обработка таймера
   bool Init(IVideo *iVideo_Ptr);//инициализация
  private:
-  //-закрытые функции-----------------------------------------------------------------------------------  
-  void OnPaint(IVideo *iVideo_Ptr);//отрисовать картинку  
+  //-закрытые функции-----------------------------------------------------------------------------------
+  void OnPaint(IVideo *iVideo_Ptr);//отрисовать картинку
   void KeyboardControl(bool left,bool right,bool up,bool down,bool fire);//управление от клавиатуры
   void PressUse(void);//нажата кнопка "использовать"
   void DizzyAnimation(void);//выполнить анимацию Диззи

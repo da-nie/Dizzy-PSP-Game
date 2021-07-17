@@ -24,7 +24,7 @@ class CVideo_Software:public IVideo
   static const uint32_t FONT_WIDTH=8;//ширина шрифта
   static const uint32_t FONT_HEIGHT=14;//высота шрифта
   //-переменные-----------------------------------------------------------------------------------------
-  uint32_t *VideoBuffer_Ptr;//видеобуфер
+  uint16_t *VideoBuffer_Ptr;//видеобуфер
   uint32_t LineSize;//длина строки
   uint32_t ScreenWidth;//ширина экрана
   uint32_t ScreenHeight;//высота экрана

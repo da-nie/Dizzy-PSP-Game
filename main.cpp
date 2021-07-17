@@ -48,43 +48,39 @@ int SetupCallbacks(void)
 //начинаем программу
 int main(int argc, char  **argv)
 {
- int n;
- int argv_len=strlen(argv[0]);
- //отматываем до черты
- for(n=argv_len;n>0;n--)
- {
-  if (argv[0][n-1]=='/')
-  {
-   argv[0][n]=0;//обрубаем строку
-   break;
-  }
- }
  //устанавливаем обработчики
  SetupCallbacks();
  //настраиваем управление
  sceCtrlSetSamplingCycle(0);
  sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
  //активируем видеорежим
- long ActivePage=0;//видимая видеостраница
+ uint32_t ActivePage=0;//видимая видеостраница
  sceDisplayWaitVblankStart();
- uint32_t *VideoBuffer=(uint32_t *)(0x44000000UL+272UL*512UL*4UL*ActivePage);//адрес видеопамяти
- sceDisplaySetFrameBuf((void*)VideoBuffer,512,PSP_DISPLAY_PIXEL_FORMAT_8888,PSP_DISPLAY_SETBUF_NEXTFRAME);
+ uint16_t *VideoBuffer=(uint16_t *)(0x44000000UL+272UL*512UL*2UL*ActivePage);//адрес видеопамяти
+ sceDisplaySetFrameBuf((void*)VideoBuffer,512,PSP_DISPLAY_PIXEL_FORMAT_565,PSP_DISPLAY_SETBUF_NEXTFRAME);
  sceDisplaySetMode(0,480,272);
- sceDisplayWaitVblankStart();
+ //очистим экран
+ memset(VideoBuffer,0,272*512*sizeof(uint16_t));
+ uint16_t *VideoBuffer_Page1=(uint16_t *)(0x44000000UL+272UL*512UL*2UL*1);//адрес видеопамяти
+ memset(VideoBuffer_Page1,0,272*512*sizeof(uint16_t));
 
- //CPSPVideo cPSPVideo;
+
  CGame cGame;
  std::shared_ptr<IVideo> iVideo_Ptr;
  iVideo_Ptr.reset(IVideo::CreateNewCVideoSoftware(CGame::SCREEN_WIDTH,CGame::SCREEN_HEIGHT));
  iVideo_Ptr->Init();
 
- iVideo_Ptr->SetVideoPointer(VideoBuffer+(480-320)/2,512);
-
+ iVideo_Ptr->SetVideoPointer(VideoBuffer+(480-320)/2+512*(272-240)/2,512);
  bool enabled=cGame.Init(iVideo_Ptr.get());
+ sceDisplayWaitVblankStart();
+ sceDisplaySetFrameBuf((void*)VideoBuffer,512,PSP_DISPLAY_PIXEL_FORMAT_565,PSP_DISPLAY_SETBUF_IMMEDIATE);
+
 
  SceCtrlData pad;
  while(done==false)
  {
+  iVideo_Ptr->SetVideoPointer(VideoBuffer+(480-320)/2+512*(272-240)/2,512);
+
   u64 tick_frequency=sceRtcGetTickResolution();
   u64 begin_tick;
   u64 current_tick;
@@ -92,6 +88,7 @@ int main(int argc, char  **argv)
 
   //сканируем клавиатуру
   sceCtrlReadBufferPositive(&pad,1);
+  bool no_change_page=true;
   if (enabled==true)
   {
    bool left=false;
@@ -102,32 +99,44 @@ int main(int argc, char  **argv)
    if (pad.Buttons&PSP_CTRL_LEFT) left=true;
    if (pad.Buttons&PSP_CTRL_RIGHT) right=true;
    if (pad.Buttons&PSP_CTRL_UP) up=true;
+   if (pad.Buttons&PSP_CTRL_CROSS) up=true;
    if (pad.Buttons&PSP_CTRL_DOWN) down=true;
    if (pad.Buttons&PSP_CTRL_CIRCLE) fire=true;
-   cGame.OnTimer(left,right,up,down,fire,iVideo_Ptr.get());
+   if (pad.Buttons&PSP_CTRL_START) break;
+   no_change_page=cGame.OnTimer(left,right,up,down,fire,iVideo_Ptr.get());
   }
-
+  /*
   sceRtcGetCurrentTick(&current_tick);//текущее значение частоты
   long double delta_time=static_cast<long double>(current_tick-begin_tick);
   unsigned long fps=0;
   if (fabs(delta_time)>0.0001) fps=static_cast<unsigned long>(tick_frequency/delta_time);
   char fps_text[255];
   sprintf(fps_text,"FPS:%i",fps);
-  iVideo_Ptr->PutString(0,100,fps_text,0xFFFFFFFF);
-
-  //выводим FPS
-  //cVideo.PutString(WINDOW_WIDTH-FONT_WIDTH*(strlen(fps_text)+4),0,fps_text,0x00ffffff);
+  iVideo_Ptr->PutString(0,100,fps_text,0xFFFF);
+  */
 
   /* long bat_percent=scePowerGetBatteryLifePercent();
   long bat_time=scePowerGetBatteryLifeTime();
   */
-
   sceDisplayWaitVblankStart();
-  sceDisplaySetFrameBuf((void*)VideoBuffer,512,PSP_DISPLAY_PIXEL_FORMAT_8888,PSP_DISPLAY_SETBUF_IMMEDIATE);
+  sceDisplaySetFrameBuf((void*)VideoBuffer,512,PSP_DISPLAY_PIXEL_FORMAT_565,PSP_DISPLAY_SETBUF_IMMEDIATE);
+
+  uint16_t *last_vptr=VideoBuffer;
   ActivePage++;
   ActivePage&=1;
-  VideoBuffer=(uint32_t *)(0x44000000UL+272UL*512UL*4UL*ActivePage);//адрес видеопамяти
-  iVideo_Ptr->SetVideoPointer(VideoBuffer+(480-320)/2,512);
+  VideoBuffer=(uint16_t *)(0x44000000UL+272UL*512UL*2UL*ActivePage);//адрес видеопамяти
+  if (no_change_page==true)
+  {
+   memcpy(VideoBuffer,last_vptr,272UL*512UL*2UL);
+  }
+
+  //синхронизируем по таймеру
+  while(done==false)
+  {
+   sceRtcGetCurrentTick(&current_tick);//текущее значение частоты
+   double time_span=((double)(current_tick-begin_tick))/(double)tick_frequency;//прошедшее время
+   if (time_span>=1.0f/30.0f) break;//30 FPS
+  }
  }
  //выходим из программы
  sceKernelExitGame();
