@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Release" />
+	<File name="cactionadditem.cpp" open="0" top="0" tabpos="2">
+		<Cursor position="1279" topLine="0" />
+	</File>
+	<File name="cactioncopyposition.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="918" topLine="0" />
+	</File>
+	<File name="cactioncopypositionoffset.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="1184" topLine="0" />
+	</File>
+	<File name="cgame.cpp" open="1" top="0" tabpos="2">
+		<Cursor position="8744" topLine="169" />
+	</File>
+	<File name="cgamestate.h" open="0" top="0" tabpos="3">
+		<Cursor position="2972" topLine="31" />
+	</File>
+	<File name="cpart.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="8860" topLine="154" />
+	</File>
+	<File name="cpart.h" open="0" top="0" tabpos="2">
+		<Cursor position="3542" topLine="27" />
+	</File>
+	<File name="csyntaxanalyzer.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="45943" topLine="648" />
+	</File>
+	<File name="csyntaxanalyzer.h" open="0" top="0" tabpos="0">
+		<Cursor position="7902" topLine="92" />
+	</File>
+	<File name="cvideo_software.cpp" open="1" top="0" tabpos="3">
+		<Cursor position="29988" topLine="452" />
+	</File>
+	<File name="cvideo_software.h" open="0" top="0" tabpos="0">
+		<Cursor position="1324" topLine="0" />
+	</File>
+	<File name="ipart.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="275" topLine="0" />
+	</File>
+	<File name="ipart.h" open="0" top="0" tabpos="1">
+		<Cursor position="4032" topLine="58" />
+	</File>
+	<File name="ivideo.h" open="0" top="0" tabpos="0">
+		<Cursor position="2173" topLine="15" />
+	</File>
+	<File name="main.cpp" open="1" top="1" tabpos="1">
+		<Cursor position="2945" topLine="94" />
+	</File>
+	<File name="system.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="4745" topLine="113" />
+	</File>
+	<File name="system.h" open="0" top="0" tabpos="0">
+		<Cursor position="1884" topLine="0" />
+	</File>
+	<File name="tga.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="347" topLine="0" />
+	</File>
+	<File name="tga.h" open="0" top="0" tabpos="0">
+		<Cursor position="2903" topLine="11" />
+	</File>
+</CodeBlocks_layout_file>

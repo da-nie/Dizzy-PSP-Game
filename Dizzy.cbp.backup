@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Dizzy" />
+		<Option makefile_is_custom="1" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Release">
+				<Option output="Dizzy.exe" prefix_auto="0" extension_auto="0" />
+				<Option object_output="obj\Release\" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+				<MakeCommands>
+					<Build command="$make" />
+					<CompileFile command="" />
+					<Clean command="$make clean" />
+					<DistClean command="" />
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="cactionadditem.cpp" />
+		<Unit filename="cactionadditem.h" />
+		<Unit filename="cactionaddlife.cpp" />
+		<Unit filename="cactionaddlife.h" />
+		<Unit filename="cactionaddscore.cpp" />
+		<Unit filename="cactionaddscore.h" />
+		<Unit filename="cactionchangeanimationmode.cpp" />
+		<Unit filename="cactionchangeanimationmode.h" />
+		<Unit filename="cactionchangedescription.cpp" />
+		<Unit filename="cactionchangedescription.h" />
+		<Unit filename="cactionchangedescriptionglobal.cpp" />
+		<Unit filename="cactionchangedescriptionglobal.h" />
+		<Unit filename="cactionchangename.cpp" />
+		<Unit filename="cactionchangename.h" />
+		<Unit filename="cactionchangenameglobal.cpp" />
+		<Unit filename="cactionchangenameglobal.h" />
+		<Unit filename="cactionchangeposition.cpp" />
+		<Unit filename="cactionchangeposition.h" />
+		<Unit filename="cactioncopyposition.cpp" />
+		<Unit filename="cactioncopyposition.h" />
+		<Unit filename="cactioncopypositionoffset.cpp" />
+		<Unit filename="cactioncopypositionoffset.h" />
+		<Unit filename="cactionenergyupdate.cpp" />
+		<Unit filename="cactionenergyupdate.h" />
+		<Unit filename="cactionmessage.cpp" />
+		<Unit filename="cactionmessage.h" />
+		<Unit filename="cactionmove.cpp" />
+		<Unit filename="cactionmove.h" />
+		<Unit filename="cactionpickup.cpp" />
+		<Unit filename="cactionpickup.h" />
+		<Unit filename="cactionsetanimationstep.cpp" />
+		<Unit filename="cactionsetanimationstep.h" />
+		<Unit filename="cactionsetenabled.cpp" />
+		<Unit filename="cactionsetenabled.h" />
+		<Unit filename="cactionsingle.cpp" />
+		<Unit filename="cactionsingle.h" />
+		<Unit filename="cautomath.cpp" />
+		<Unit filename="cautomath.h" />
+		<Unit filename="cconditionalofdizzyintersection.cpp" />
+		<Unit filename="cconditionalofdizzyintersection.h" />
+		<Unit filename="cconditionalofintersection.cpp" />
+		<Unit filename="cconditionalofintersection.h" />
+		<Unit filename="cconditionalofnotdizzyintersection.cpp" />
+		<Unit filename="cconditionalofnotdizzyintersection.h" />
+		<Unit filename="cconditionalofpickup.cpp" />
+		<Unit filename="cconditionalofpickup.h" />
+		<Unit filename="cconditionaloftimer.cpp" />
+		<Unit filename="cconditionaloftimer.h" />
+		<Unit filename="cconditionalofuse.cpp" />
+		<Unit filename="cconditionalofuse.h" />
+		<Unit filename="cdizzy.cpp" />
+		<Unit filename="cdizzy.h" />
+		<Unit filename="cfontprinter.cpp" />
+		<Unit filename="cfontprinter.h" />
+		<Unit filename="cgame.cpp" />
+		<Unit filename="cgame.h" />
+		<Unit filename="cgamestate.cpp" />
+		<Unit filename="cgamestate.h" />
+		<Unit filename="clexeme.cpp" />
+		<Unit filename="clexeme.h" />
+		<Unit filename="clexicalanalyzer.cpp" />
+		<Unit filename="clexicalanalyzer.h" />
+		<Unit filename="cpart.cpp" />
+		<Unit filename="cpart.h" />
+		<Unit filename="cpspvideo.cpp" />
+		<Unit filename="cpspvideo.h" />
+		<Unit filename="craiifilein.cpp" />
+		<Unit filename="craiifilein.h" />
+		<Unit filename="craiifileout.cpp" />
+		<Unit filename="craiifileout.h" />
+		<Unit filename="csprite.cpp" />
+		<Unit filename="csprite.h" />
+		<Unit filename="csyntaxanalyzer.cpp" />
+		<Unit filename="csyntaxanalyzer.h" />
+		<Unit filename="ctile.cpp" />
+		<Unit filename="ctile.h" />
+		<Unit filename="ctilessequence.cpp" />
+		<Unit filename="ctilessequence.h" />
+		<Unit filename="cvideo_software.cpp" />
+		<Unit filename="cvideo_software.h" />
+		<Unit filename="iaction.cpp" />
+		<Unit filename="iaction.h" />
+		<Unit filename="iconditionalexpression.cpp" />
+		<Unit filename="iconditionalexpression.h" />
+		<Unit filename="ipart.cpp" />
+		<Unit filename="ipart.h" />
+		<Unit filename="ivideo.cpp" />
+		<Unit filename="ivideo.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="system.cpp" />
+		<Unit filename="system.h" />
+		<Unit filename="tga.cpp" />
+		<Unit filename="tga.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
