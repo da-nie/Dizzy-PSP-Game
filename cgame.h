@@ -43,7 +43,7 @@ class CGame
   //-перечисления---------------------------------------------------------------------------------------
   //-структуры------------------------------------------------------------------------------------------
   //-константы------------------------------------------------------------------------------------------
-  static const uint16_t BLACK_COLOR=(0<<5)|(0<<5)|(0<<0);//чёрный цвет
+  static const uint16_t BLACK_COLOR=(0<<11)|(0<<5)|(0<<0);//чёрный цвет
   static const uint16_t YELLOW_COLOR=(31<<11)|(63<<5)|(0<<0);//жёлтый цвет
 
   static const uint8_t BLEND_COLOR_B=81>>3;//прозрачный цвет, компонент R
@@ -52,10 +52,10 @@ class CGame
   static const uint16_t SKY_COLOR=(BLEND_COLOR_R<<11)|(BLEND_COLOR_G<<5)|(BLEND_COLOR_B<<0);//цвет неба
   static const uint16_t BLEND_COLOR=(BLEND_COLOR_R<<11)|(BLEND_COLOR_G<<5)|(BLEND_COLOR_B<<0);//прозрачный цвет
 
-  static const uint8_t NO_BARRIER_COLOR_B=0;//цвет отсутствия препятствий, компонент R
+  static const uint8_t NO_BARRIER_COLOR_R=0;//цвет отсутствия препятствий, компонент R
   static const uint8_t NO_BARRIER_COLOR_G=0;//цвет отсутствия препятствий, компонент G
-  static const uint8_t NO_BARRIER_COLOR_R=0;//цвет отсутствия препятствий, компонент B
-  static const uint16_t NO_BARRIER_COLOR=(NO_BARRIER_COLOR_R<<11)|(NO_BARRIER_COLOR_G<<5)|(NO_BARRIER_COLOR_B<<0);//цвет остутствия препятствий
+  static const uint8_t NO_BARRIER_COLOR_B=0;//цвет отсутствия препятствий, компонент B
+  static const uint32_t NO_BARRIER_COLOR=(NO_BARRIER_COLOR_R<<11)|(NO_BARRIER_COLOR_G<<5)|(NO_BARRIER_COLOR_B<<0);//цвет остутствия препятствий
 
   static const uint16_t ENERGY_GOOD_COLOR=(8<<11)|(63<<5)|(8<<0);//цвет "отлично"
   static const uint16_t ENERGY_NORMAL_COLOR=(8<<11)|(63<<5)|(31<<0);//цвет "хорошо"
@@ -139,17 +139,20 @@ class CGame
   void DrawBarrier(IVideo *iVideo_Ptr);//нарисовать преграды
   void DrawMap(IVideo *iVideo_Ptr);//нарисовать карту
   void DrawFirstPlaneMap(IVideo *iVideo_Ptr);//нарисовать карту переднего плана
-  void DrawItemMap(IVideo *iVideo_Ptr);//нарисовать карту предметов
+  void DrawBeforeBackgroundMap(IVideo *iVideo_Ptr);//нарисовать карту тайлов перед фоном
   void PutMessage(CGameState::SMessage &sMessage,IVideo *iVideo_Ptr);//вывод сообщения
   void PutFrame(int32_t x,int32_t y,int32_t text_width,int32_t text_height,IVideo *iVideo_Ptr);//нарисовать рамку с заданным внутренним полем для текста (x,y,text_width,text_height - зона вывода текста)
   void PutInventory(IVideo *iVideo_Ptr);//вывести инвентарь
   void SetDescription(const std::string &name,const std::string &description);//задать описание
   void PushInventory(std::shared_ptr<IPart> iPart_Ptr);//положить в инвентарь
   std::shared_ptr<IPart> PopInventory(size_t index);//вынуть из инвентаря
+  void DrawScreenFrame(IVideo *iVideo_Ptr);//нарисовать экранную рамку
+  void VisitTree(std::shared_ptr<CGameState::SQuadricTree> &sQuadricTree_Ptr,CGameState::SVisitTree &sVisitTree);//функция обхода дерева
+  bool LoadMap(const std::string &file_name);//загрузить карту
+  std::shared_ptr<CGameState::SQuadricTree> LoadQuadricTree(std::ifstream &file);//загрузить квадратичное дерево
   bool LoadConditional(const std::string &path,std::vector<std::string> &log);//загрузить условия игры
   bool LoadConditionalFile(const std::string &file_name,std::vector<std::string> &log);//загрузить файл условий игры
-  bool LoadMap(const std::string &file_name);//загрузить карту
-  void DrawScreenFrame(IVideo *iVideo_Ptr);//нарисовать экранную рамку
+  void ChangeDizzyCoord(int32_t dx,int32_t dy,IVideo *iVideo_Ptr);//изменить координаты Диззи, переместить карту и перерисовать барьеры
   void MoveMap(IVideo *iVideo_Ptr);//выполнить перемещение карты, если требуется
   bool MoveMapStep(int32_t width,int32_t height,int32_t offset_y);//выполнить перемещение карты на один шаг, если требуется
 };

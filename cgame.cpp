@@ -68,8 +68,8 @@ void CGame::OnPaint(IVideo *iVideo_Ptr)
  iVideo_Ptr->ClearScreen(SKY_COLOR);
  //рисуем карту
  DrawMap(iVideo_Ptr);
- //рисуем предметы
- DrawItemMap(iVideo_Ptr);
+ //рисуем тайлы перед фоном
+ DrawBeforeBackgroundMap(iVideo_Ptr);
  //рисуем Диззи
  cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,cGameState.X,cGameState.Y,DIZZY_WIDTH*cDizzy.sFrame_Ptr->ImageFrame,0,DIZZY_WIDTH,DIZZY_HEIGHT,true);
  //рисуем элементы переднего плана
@@ -243,7 +243,7 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
    if (IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==false)//пересечение не выше допуска
    {
     //поднимаем Диззи на уровень без пересечения
-    while(IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true) cGameState.Y--;
+    while(IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true && IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==false) ChangeDizzyCoord(0,-1,iVideo_Ptr);
    }
    else
    {
@@ -263,16 +263,10 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
    dY=0;
   }
 
-  bool redraw_barrier=MoveMapStep(width,height,offset_y);
-
-  if (redraw_barrier==true)
-  {
-   iVideo_Ptr->ClearScreen(NO_BARRIER_COLOR);
-   DrawBarrier(iVideo_Ptr);
-  }
+  ChangeDizzyCoord(0,0,iVideo_Ptr);
  }
 
- if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y+1)==false)//можно падать
+ if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y+1)==false && IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y+1)==false)//можно падать
  {
   if (MoveTickCounter==0)
   {
@@ -289,14 +283,13 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
   }
   else MoveControl=true;
  }
-
  //особый случай: Диззи не двигался, но произошло столкновение (так как двигался другой элемент)
  if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true || IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==true)//зафиксировано столкновение
  {
   //предмет вытесняет Диззи вверх
   for(size_t n=0;n<TILE_WIDTH/4;n++)
   {
-   if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true || IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==true) cGameState.Y--;
+   if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true || IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==true) ChangeDizzyCoord(0,-1,iVideo_Ptr);
   }
  }
 }
@@ -330,14 +323,15 @@ void CGame::ConditionalProcessing(void)
 //----------------------------------------------------------------------------------------------------
 void CGame::DizzyEnergyProcessing(IVideo *iVideo_Ptr)
 {
- static const char RESPAWN[]="RESPAWN";//имя тайла восстановления
+ static const char RESPAWN[]="RESPAWN";//название тайла восстановления
+
  if (cGameState.Energy==0)//Диззи погиб
  {
-  cGameState.AddMessage("ДИЗЗИ ПОГИБ!\\ВЫ ПОТЕРЯЛИ ЖИЗНЬ",100,120);
+  cGameState.AddMessageLifeLost();
   if (cGameState.Life>1) cGameState.Life--;
   else//игра начинается сначала
   {
-   cGameState.AddMessage("ВЫ ПРОИГРАЛИ!",150,120);
+   cGameState.AddMessageGameOver();
    Init(iVideo_Ptr);
    return;
   }
@@ -430,7 +424,17 @@ void CGame::DrawBarrier(IVideo *iVideo_Ptr)
 
   tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
  };
- std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_barrier_function);
+
+ CGameState::SVisitTree sVisitTree;
+ sVisitTree.callback_function=drawing_barrier_function;
+ sVisitTree.ScreenLeft=cGameState.Map_X;
+ sVisitTree.ScreenTop=cGameState.Map_Y;
+ sVisitTree.ScreenRight=sVisitTree.ScreenLeft+SCREEN_WIDTH;
+ sVisitTree.ScreenBottom=sVisitTree.ScreenTop+SCREEN_HEIGHT;
+
+ VisitTree(cGameState.QuadricTree_Ptr,sVisitTree);
+
+ std::for_each(cGameState.MapNamed.begin(),cGameState.MapNamed.end(),drawing_barrier_function);
 }
 //----------------------------------------------------------------------------------------------------
 //нарисовать карту
@@ -443,7 +447,7 @@ void CGame::DrawMap(IVideo *iVideo_Ptr)
  auto drawing_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
  {
   if (iPart_Ptr->FirstPlane==true) return;//передний план выводится отдельно
-  if (iPart_Ptr->Item==true) return;//предметы выводятся отдельно
+  if (iPart_Ptr->BeforeBackground==true) return;//тайлы перед фоном выводятся отдельно
   if (iPart_Ptr->InInventory==true) return;//предметы в инвентаре не выводятся
   if (iPart_Ptr->Enabled==false) return;//предмет неактивен
 
@@ -461,7 +465,17 @@ void CGame::DrawMap(IVideo *iVideo_Ptr)
 
   tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
  };
- std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_function);
+
+ CGameState::SVisitTree sVisitTree;
+ sVisitTree.callback_function=drawing_function;
+ sVisitTree.ScreenLeft=cGameState.Map_X;
+ sVisitTree.ScreenTop=cGameState.Map_Y;
+ sVisitTree.ScreenRight=sVisitTree.ScreenLeft+SCREEN_WIDTH;
+ sVisitTree.ScreenBottom=sVisitTree.ScreenTop+SCREEN_HEIGHT;
+
+ VisitTree(cGameState.QuadricTree_Ptr,sVisitTree);
+
+ std::for_each(cGameState.MapNamed.begin(),cGameState.MapNamed.end(),drawing_function);
 }
 //----------------------------------------------------------------------------------------------------
 //нарисовать карту переднего плана
@@ -491,20 +505,30 @@ void CGame::DrawFirstPlaneMap(IVideo *iVideo_Ptr)
 
   tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
  };
- std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_function);
+
+ CGameState::SVisitTree sVisitTree;
+ sVisitTree.callback_function=drawing_function;
+ sVisitTree.ScreenLeft=cGameState.Map_X;
+ sVisitTree.ScreenTop=cGameState.Map_Y;
+ sVisitTree.ScreenRight=sVisitTree.ScreenLeft+SCREEN_WIDTH;
+ sVisitTree.ScreenBottom=sVisitTree.ScreenTop+SCREEN_HEIGHT;
+
+ VisitTree(cGameState.QuadricTree_Ptr,sVisitTree);
+
+ std::for_each(cGameState.MapNamed.begin(),cGameState.MapNamed.end(),drawing_function);
 }
 
 //----------------------------------------------------------------------------------------------------
-//нарисовать карту предметов
+//нарисовать тайлы перед фоном
 //----------------------------------------------------------------------------------------------------
-void CGame::DrawItemMap(IVideo *iVideo_Ptr)
+void CGame::DrawBeforeBackgroundMap(IVideo *iVideo_Ptr)
 {
  //рисуем фон
  CSprite &tiles=cSprite_Tiles;
 
  auto drawing_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
  {
-  if (iPart_Ptr->Item==false) return;//здесь выводятся только предметы
+  if (iPart_Ptr->BeforeBackground==false) return;//здесь выводятся только тайлы перед фоном
   if (iPart_Ptr->InInventory==true) return;//предметы в инвентаре не выводятся
   if (iPart_Ptr->Enabled==false) return;//предмет неактивен
 
@@ -522,7 +546,17 @@ void CGame::DrawItemMap(IVideo *iVideo_Ptr)
 
   tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
  };
- std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_function);
+
+ CGameState::SVisitTree sVisitTree;
+ sVisitTree.callback_function=drawing_function;
+ sVisitTree.ScreenLeft=cGameState.Map_X;
+ sVisitTree.ScreenTop=cGameState.Map_Y;
+ sVisitTree.ScreenRight=sVisitTree.ScreenLeft+SCREEN_WIDTH;
+ sVisitTree.ScreenBottom=sVisitTree.ScreenTop+SCREEN_HEIGHT;
+
+ VisitTree(cGameState.QuadricTree_Ptr,sVisitTree);
+
+ std::for_each(cGameState.MapNamed.begin(),cGameState.MapNamed.end(),drawing_function);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -586,7 +620,7 @@ void CGame::PutFrame(int32_t x,int32_t y,int32_t text_width,int32_t text_height,
  int32_t rx2=rx1+width-1;
  int32_t ry2=ry1+height-1;
  //закрашиваем прямоугольник
- iVideo_Ptr->FillRectangle(rx1,ry1,rx2,ry2,0x00000000);
+ iVideo_Ptr->FillRectangle(rx1,ry1,rx2,ry2,BLACK_COLOR);
  //рисуем рамку
  //сначала уголки
  cSprite_Frame.PutSpriteItem(iVideo_Ptr,rx1-FRAME_ANGLE_WIDTH,ry1-FRAME_ANGLE_HEIGHT,FRAME_ANGLE_LEFT_UP_OFFSET_X,FRAME_ANGLE_LEFT_UP_OFFSET_Y,FRAME_ANGLE_WIDTH,FRAME_ANGLE_HEIGHT,true);
@@ -751,7 +785,7 @@ void CGame::DrawScreenFrame(IVideo *iVideo_Ptr)
  iVideo_Ptr->FillRectangle(x1,y1,x_bad,y2,ENERGY_BAD_COLOR);
  if (x2>x_bad)
  {
-  int32_t x_normal=x1+part*2;//вторая часть
+  int32_t x_normal=x1+part*2;
   if (x2<x_normal) x_normal=x2;
   iVideo_Ptr->FillRectangle(x_bad,y1,x_normal,y2,ENERGY_NORMAL_COLOR);
   if (x2>x_normal)
@@ -761,9 +795,39 @@ void CGame::DrawScreenFrame(IVideo *iVideo_Ptr)
   }
  }
  //выводим количество собранных предметов
+ static const int32_t ITEM_OFFSET_POS_X=129;//положение количества собранных предметов по X
+ static const int32_t ITEM_OFFSET_POS_Y=32;//положение количества собранных предметов по Y
+
  sprintf(str,"%02i",cGameState.Items);
- cFontPrinter_Ptr->PrintAt(129,32,str,iVideo_Ptr);
+ cFontPrinter_Ptr->PrintAt(ITEM_OFFSET_POS_X,ITEM_OFFSET_POS_Y,str,iVideo_Ptr);
 }
+
+
+//----------------------------------------------------------------------------------------------------
+//функция обхода дерева
+//----------------------------------------------------------------------------------------------------
+void CGame::VisitTree(std::shared_ptr<CGameState::SQuadricTree> &sQuadricTree_Ptr,CGameState::SVisitTree &sVisitTree)
+{
+ if (sQuadricTree_Ptr.get()==NULL) return;
+ //проверяем описывающий прямоугольник
+ if (sQuadricTree_Ptr->Left>sVisitTree.ScreenRight) return;
+ if (sQuadricTree_Ptr->Top>sVisitTree.ScreenBottom) return;
+ if (sQuadricTree_Ptr->Right<sVisitTree.ScreenLeft) return;
+ if (sQuadricTree_Ptr->Bottom<sVisitTree.ScreenTop) return;
+ //обрабатываем дерево
+ size_t size=sQuadricTree_Ptr->LeafItem.size();
+ if (size>0)//это лист
+ {
+  for(size_t n=0;n<size;n++) sVisitTree.callback_function(sQuadricTree_Ptr->LeafItem[n]);
+  return;
+ }
+ //вызываем обход поддеревьев
+ VisitTree(sQuadricTree_Ptr->LeftTop_Ptr,sVisitTree);
+ VisitTree(sQuadricTree_Ptr->LeftBottom_Ptr,sVisitTree);
+ VisitTree(sQuadricTree_Ptr->RightTop_Ptr,sVisitTree);
+ VisitTree(sQuadricTree_Ptr->RightBottom_Ptr,sVisitTree);
+}
+
 //----------------------------------------------------------------------------------------------------
 //загрузить карту
 //----------------------------------------------------------------------------------------------------
@@ -772,7 +836,8 @@ bool CGame::LoadMap(const std::string &file_name)
  std::ifstream file;
  file.open(file_name,std::ios_base::in|std::ios_base::binary);
  if (file.is_open()==false) return(false);
- int32_t part;
+ //загружаем список элементов карты
+ size_t part;
  if (file.read(reinterpret_cast<char*>(&part),sizeof(part)).fail()==true) return(false);
 
  for(size_t n=0;n<part;n++)
@@ -780,11 +845,68 @@ bool CGame::LoadMap(const std::string &file_name)
   std::shared_ptr<IPart> iPart_Ptr(new CPart());
   if (iPart_Ptr->Load(file)==false) return(false);
   cGameState.Map.push_back(iPart_Ptr);
-  if (iPart_Ptr->Name.length()>0) cGameState.MapNamed.push_back(iPart_Ptr);
  }
+ //загружаем список индексов именованных элементов
+ if (file.read(reinterpret_cast<char*>(&part),sizeof(part)).fail()==true) return(false);
+ for(size_t n=0;n<part;n++)
+ {
+  size_t index;
+  if (file.read(reinterpret_cast<char*>(&index),sizeof(index)).fail()==true) return(false);
+  cGameState.MapNamed.push_back(cGameState.Map[index]);
+ }
+ //загружаем квадратичное дерево неименованных элементов
+ cGameState.QuadricTree_Ptr=LoadQuadricTree(file);
  return(true);
 }
+//----------------------------------------------------------------------------------------------------
+//загрузить квадратичное дерево
+//----------------------------------------------------------------------------------------------------
+std::shared_ptr<CGameState::SQuadricTree> CGame::LoadQuadricTree(std::ifstream &file)
+{
+ std::shared_ptr<CGameState::SQuadricTree> sQuadricTree(new CGameState::SQuadricTree());
 
+ static const uint8_t STATE_LEAF=0;//элемент является листом дерева
+ static const uint8_t STATE_TREE=1;//элемент является узлом деревом
+
+ static const uint8_t TREE_LEFT_TOP_MASK=(1<<0);//есть левое верхнее поддерево
+ static const uint8_t TREE_LEFT_BOTTOM_MASK=(1<<1);//есть левое нижнее поддерево
+ static const uint8_t TREE_RIGHT_TOP_MASK=(1<<2);//есть правое верхнее поддерево
+ static const uint8_t TREE_RIGHT_BOTTOM_MASK=(1<<3);//есть правое нижнее поддерево
+ //считываем тип узла
+ uint8_t state;
+ if (file.read(reinterpret_cast<char*>(&state),sizeof(state)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
+ //считываем описывающий прямоугольник
+ if (file.read(reinterpret_cast<char*>(&sQuadricTree->Left),sizeof(sQuadricTree->Left)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
+ if (file.read(reinterpret_cast<char*>(&sQuadricTree->Right),sizeof(sQuadricTree->Right)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
+ if (file.read(reinterpret_cast<char*>(&sQuadricTree->Top),sizeof(sQuadricTree->Top)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
+ if (file.read(reinterpret_cast<char*>(&sQuadricTree->Bottom),sizeof(sQuadricTree->Bottom)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
+ //загружаем данные дерева
+ if (state==STATE_LEAF)//загружаем данные листа
+ {
+  size_t part;
+  if (file.read(reinterpret_cast<char*>(&part),sizeof(part)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
+  for(size_t n=0;n<part;n++)
+  {
+   size_t index;
+   if (file.read(reinterpret_cast<char*>(&index),sizeof(index)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
+   sQuadricTree->LeafItem.push_back(cGameState.Map[index]);
+  }
+  return(sQuadricTree);
+ }
+ //загружаем центр
+ if (file.read(reinterpret_cast<char*>(&sQuadricTree->CenterX),sizeof(sQuadricTree->CenterX)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
+ if (file.read(reinterpret_cast<char*>(&sQuadricTree->CenterY),sizeof(sQuadricTree->CenterY)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
+ //загружаем поддеревья
+ if (state==STATE_TREE)
+ {
+  if (file.read(reinterpret_cast<char*>(&state),sizeof(state)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
+  if (state&TREE_LEFT_TOP_MASK) sQuadricTree->LeftTop_Ptr=LoadQuadricTree(file);
+  if (state&TREE_LEFT_BOTTOM_MASK) sQuadricTree->LeftBottom_Ptr=LoadQuadricTree(file);
+  if (state&TREE_RIGHT_TOP_MASK) sQuadricTree->RightTop_Ptr=LoadQuadricTree(file);
+  if (state&TREE_RIGHT_BOTTOM_MASK) sQuadricTree->RightBottom_Ptr=LoadQuadricTree(file);
+ }
+ return(sQuadricTree);
+}
 //----------------------------------------------------------------------------------------------------
 //загрузить условия игры
 //----------------------------------------------------------------------------------------------------
@@ -879,6 +1001,81 @@ bool CGame::LoadConditionalFile(const std::string &file_name,std::vector<std::st
  }
  return(true);
 }
+//----------------------------------------------------------------------------------------------------
+//изменить координаты Диззи, переместить карту и перерисовать барьеры
+//----------------------------------------------------------------------------------------------------
+void CGame::ChangeDizzyCoord(int32_t dx,int32_t dy,IVideo *iVideo_Ptr)
+{
+ uint32_t w;
+ uint32_t h;
+ iVideo_Ptr->GetScreenSize(w,h);
+ int32_t width=w;
+ int32_t height=h;
+ int32_t offset_y=cSprite_Header.GetHeight();
+ height-=offset_y;
+
+ cGameState.X+=dx;
+ cGameState.Y+=dy;
+
+ bool redraw_barrier=MoveMapStep(width,height,offset_y);
+ if (redraw_barrier==true)
+ {
+  iVideo_Ptr->ClearScreen(NO_BARRIER_COLOR);
+  DrawBarrier(iVideo_Ptr);
+ }
+}
+//----------------------------------------------------------------------------------------------------
+//выполнить перемещение карты, если требуется
+//----------------------------------------------------------------------------------------------------
+void CGame::MoveMap(IVideo *iVideo_Ptr)
+{
+ uint32_t w;
+ uint32_t h;
+ iVideo_Ptr->GetScreenSize(w,h);
+ int32_t width=w;
+ int32_t height=h;
+ int32_t offset_y=cSprite_Header.GetHeight();
+ height-=offset_y;
+ while(1)
+ {
+  if (MoveMapStep(width,height,offset_y)==false) break;
+ }
+}
+
+//----------------------------------------------------------------------------------------------------
+//выполнить перемещение карты на один шаг, если требуется
+//----------------------------------------------------------------------------------------------------
+bool CGame::MoveMapStep(int32_t width,int32_t height,int32_t offset_y)
+{
+ static const int32_t DELTA=0;
+
+ bool update=false;
+ if (cGameState.X<width/4 && cGameState.Map_X>=DELTA)
+ {
+  cGameState.Map_X-=(width/4-cGameState.X);
+  cGameState.X=width/4;
+  update=true;
+ }
+ if (cGameState.X>3*width/4)
+ {
+  cGameState.Map_X+=(cGameState.X-3*width/4);
+  cGameState.X=3*width/4;
+  update=true;
+ }
+ if (cGameState.Y>(3*height/4+offset_y))
+ {
+  cGameState.Map_Y+=(cGameState.Y-(3*height/4+offset_y));
+  cGameState.Y=(3*height/4+offset_y);
+  update=true;
+ }
+ if (cGameState.Y<(height/4+offset_y) && cGameState.Map_Y>=DELTA)
+ {
+  cGameState.Map_Y-=((height/4+offset_y)-cGameState.Y);
+  cGameState.Y=(height/4+offset_y);
+  update=true;
+ }
+ return(update);
+}
 
 //****************************************************************************************************
 //открытые функции
@@ -926,56 +1123,6 @@ bool CGame::OnTimer(bool left,bool right,bool up,bool down,bool fire,IVideo *iVi
  }
  return(no_change_page);
 }
-//----------------------------------------------------------------------------------------------------
-//выполнить перемещение карты, если требуется
-//----------------------------------------------------------------------------------------------------
-void CGame::MoveMap(IVideo *iVideo_Ptr)
-{
- uint32_t w;
- uint32_t h;
- iVideo_Ptr->GetScreenSize(w,h);
- int32_t width=w;
- int32_t height=h;
- int32_t offset_y=cSprite_Header.GetHeight();
- height-=offset_y;
- while(1)
- {
-  if (MoveMapStep(width,height,offset_y)==false) break;
- }
-}
-
-//----------------------------------------------------------------------------------------------------
-//выполнить перемещение карты на один шаг, если требуется
-//----------------------------------------------------------------------------------------------------
-bool CGame::MoveMapStep(int32_t width,int32_t height,int32_t offset_y)
-{
- bool update=false;
- if (cGameState.X<width/4 && cGameState.Map_X>=2)
- {
-  cGameState.Map_X-=2;
-  cGameState.X+=2;
-  update=true;
- }
- if (cGameState.X>=3*width/4)
- {
-  cGameState.Map_X+=2;
-  cGameState.X-=2;
-  update=true;
- }
- if (cGameState.Y>=(3*height/4+offset_y))
- {
-  cGameState.Y-=2;
-  cGameState.Map_Y+=2;
-  update=true;
- }
- if (cGameState.Y<(height/4+offset_y) && cGameState.Map_Y>=2)
- {
-  cGameState.Y+=2;
-  cGameState.Map_Y-=2;
-  update=true;
- }
- return(update);
-}
 
 //----------------------------------------------------------------------------------------------------
 //инициализация
@@ -1008,6 +1155,7 @@ bool CGame::Init(IVideo *iVideo_Ptr)
  //загружаем карту
  cGameState.Map.clear();
  cGameState.MapNamed.clear();
+ cGameState.QuadricTree_Ptr.reset();
  if (LoadMap(MAP_FILE_NAME)==false)
  {
   std::string message="Не могу открыть файл карты "+std::string(MAP_FILE_NAME)+" !";

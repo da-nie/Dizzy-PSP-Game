@@ -44,19 +44,21 @@ class CSyntaxAnalyzer
    ID_LEXEME_TYPE_COPY_POSITION,
    ID_LEXEME_TYPE_COPY_POSITION_OFFSET,
    ID_LEXEME_TYPE_SET_DIZZY_POSITION,
+   ID_LEXEME_TYPE_SET_LIFE_LOST_MESSAGE,
+   ID_LEXEME_TYPE_SET_GAME_OVER_MESSAGE,
    //команды действий
    ID_LEXEME_TYPE_ACTION_MESSAGE,
    ID_LEXEME_TYPE_ACTION_CHANGE_NAME,
-   ID_LEXEME_TYPE_ACTION_CHANGE_DESCRIPTION,
+   ID_LEXEME_TYPE_ACTION_CHANGE_DESCRIPTION, 
    ID_LEXEME_TYPE_ACTION_CHANGE_NAME_GLOBAL,
-   ID_LEXEME_TYPE_ACTION_CHANGE_DESCRIPTION_GLOBAL,
+   ID_LEXEME_TYPE_ACTION_CHANGE_DESCRIPTION_GLOBAL, 
    ID_LEXEME_TYPE_ACTION_CHANGE_POSITION,
    ID_LEXEME_TYPE_ACTION_COPY_POSITION,
    ID_LEXEME_TYPE_ACTION_COPY_POSITION_OFFSET,
    ID_LEXEME_TYPE_ACTION_PICK_UP,
    ID_LEXEME_TYPE_ACTION_SET_ANIMATION_STEP,
-   ID_LEXEME_TYPE_ACTION_SET_ENABLED,
-   ID_LEXEME_TYPE_ACTION_SINGLE,
+   ID_LEXEME_TYPE_ACTION_SET_ENABLED, 
+   ID_LEXEME_TYPE_ACTION_SINGLE, 
    ID_LEXEME_TYPE_ACTION_MOVE,
    ID_LEXEME_TYPE_ACTION_ENERGY_UPDATE,
    ID_LEXEME_TYPE_ACTION_ADD_SCORE,
@@ -79,7 +81,7 @@ class CSyntaxAnalyzer
 
    ID_LEXEME_TYPE_ACTION_BEGIN,
    ID_LEXEME_TYPE_ACTION_END
-  };
+  };  
 
   enum MODE//режим работы
   {
@@ -97,7 +99,7 @@ class CSyntaxAnalyzer
  private:
   //-переменные-----------------------------------------------------------------------------------------
   CLexicalAnalyzer cLexicalAnalyzer;//лексический анализатор
-  CAutomath cAutomath_Syntax;//автомат синтаксического разбора
+  CAutomath cAutomath_Syntax;//автомат синтаксического разбора  
   std::vector<CLexeme> vector_CLexeme;//собранный список лексем команды
 
   MODE Mode;//режим работы транслятора
@@ -112,7 +114,7 @@ class CSyntaxAnalyzer
   //-открытые функции-----------------------------------------------------------------------------------
   bool Processing(char symbol,int32_t line_index,std::string &message,bool &new_line,CGameState &cGameState);//создать цепочку команд
  private:
-  //-закрытые функции-----------------------------------------------------------------------------------
+  //-закрытые функции-----------------------------------------------------------------------------------  
   double ConvertAngleToSec(const char *string);//получить угол по строке формата a'b'c
   void SetDescription(const std::string &name,const std::string &description,std::vector<std::shared_ptr<IPart> > &Map);//задать описание
   void CopyPosition(const std::string &name_first,const std::string &name_second,int32_t offset_x,int32_t offset_y,std::vector<std::shared_ptr<IPart> > &Map);//переместить объект в заданную позицию
@@ -127,7 +129,7 @@ class CSyntaxAnalyzer
   bool ModeAddAction(const CLexeme &cLexeme_Command,int32_t line_index,std::string &message,std::vector<std::shared_ptr<IConditionalExpression> > &ConditionalExpression);//обработка лексемы в режиме MODE_ADD_ACTION
   bool NewCommand(const std::vector<CLexeme> &lexeme,int32_t line_index,std::string &message,std::vector<std::shared_ptr<IConditionalExpression> > &ConditionalExpression,CGameState &cGameState);//сформирована новая команда
   std::shared_ptr<IAction> CreateAction(const std::vector<CLexeme> &lexeme,std::shared_ptr<IAction> next_ptr);//создать действие по лексеме
-  std::shared_ptr<IConditionalExpression> CreateConditional(void);//создание условного выражение по списку лексем
+  std::shared_ptr<IConditionalExpression> CreateConditional(void);//создание условного выражение по списку лексем  
 };
 
 #endif

@@ -23,7 +23,7 @@
 //конструктор
 //----------------------------------------------------------------------------------------------------
 CActionCopyPosition::CActionCopyPosition(const std::string &name_one,const std::string &name_two,std::shared_ptr<IAction> iAction_Ptr)
-{
+{ 
  Name_One=name_one;
  Name_Two=name_two;
  iAction_NextPtr=iAction_Ptr;
@@ -63,11 +63,11 @@ void CActionCopyPosition::Execute(std::shared_ptr<IPart> iPart_Ptr,CGameState &c
   if (cGameState.MapNamed[n]->Name.compare(Name_Two)==0) part_two_ptr=cGameState.MapNamed[n];
  }
  if (part_one_ptr.get()!=NULL && part_two_ptr.get()!=NULL)//выполняем замену координат
- {
+ {  
   part_one_ptr->BlockPosX=part_two_ptr->BlockPosX;
   part_one_ptr->BlockPosY=part_two_ptr->BlockPosY;
  }
- if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Execute(iPart_Ptr,cGameState);
+ if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Execute(iPart_Ptr,cGameState);	
 }
 //----------------------------------------------------------------------------------------------------
 //инициализация

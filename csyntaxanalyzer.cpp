@@ -26,7 +26,6 @@
 #include "cactionaddscore.h"
 #include "cactionadditem.h"
 #include "cactionchangeanimationmode.h"
-
 #include <string.h>
 
 //****************************************************************************************************
@@ -63,6 +62,9 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  cLexicalAnalyzer.AddLexeme("CopyPosition",ID_LEXEME_TYPE_COPY_POSITION);
  cLexicalAnalyzer.AddLexeme("CopyPositionOffset",ID_LEXEME_TYPE_COPY_POSITION_OFFSET);
  cLexicalAnalyzer.AddLexeme("SetDizzyPosition",ID_LEXEME_TYPE_SET_DIZZY_POSITION);
+
+ cLexicalAnalyzer.AddLexeme("SetLifeLostMessage",ID_LEXEME_TYPE_SET_LIFE_LOST_MESSAGE);
+ cLexicalAnalyzer.AddLexeme("SetGameOverMessage",ID_LEXEME_TYPE_SET_GAME_OVER_MESSAGE);
  //команды действий
 
  cLexicalAnalyzer.AddLexeme("ActionMessage",ID_LEXEME_TYPE_ACTION_MESSAGE);
@@ -280,11 +282,13 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  cAutomath_Syntax.AddRule("if_use(`A`,","if_use(`A`,`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
  cAutomath_Syntax.AddRule("if_use(`A`,`A`","if_use(`A`,`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
 
- //команда IfTimer("WAIT CAT")
+ //команда IfTimer(1,"WAIT CAT")
  cAutomath_Syntax.AddRule("begin","if_timer",ID_LEXEME_TYPE_IF_TIMER,ID_LEXEME_TYPE_IF_TIMER,false);
  cAutomath_Syntax.AddRule("if_timer","if_timer(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
- cAutomath_Syntax.AddRule("if_timer(","if_timer(`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
- cAutomath_Syntax.AddRule("if_timer(`A`","if_timer(`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
+ cAutomath_Syntax.AddRule("if_timer(","if_timer(N",CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("if_timer(N","if_timer(N,",CLexeme::ID_LEXEME_TYPE_COMMA,CLexeme::ID_LEXEME_TYPE_COMMA,false);
+ cAutomath_Syntax.AddRule("if_timer(N,","if_timer(N,`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
+ cAutomath_Syntax.AddRule("if_timer(N,`A`","if_timer(N,`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
 
  //команда SetDescription("BOTTLE WATER","БУТЫЛКА ВОДЫ")
  cAutomath_Syntax.AddRule("begin","set_description",ID_LEXEME_TYPE_SET_DESCRIPTION,ID_LEXEME_TYPE_SET_DESCRIPTION,false);
@@ -321,6 +325,26 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  cAutomath_Syntax.AddRule("set_dizzy_position","set_dizzy_position(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
  cAutomath_Syntax.AddRule("set_dizzy_position(","set_dizzy_position(`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
  cAutomath_Syntax.AddRule("set_dizzy_position(`A`","set_dizzy_position(`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
+
+ //команда SetLifeLostMessage(20,100,"СООБЩЕНИЕ")
+ cAutomath_Syntax.AddRule("begin","set_life_lost_message",ID_LEXEME_TYPE_SET_LIFE_LOST_MESSAGE,ID_LEXEME_TYPE_SET_LIFE_LOST_MESSAGE,false);
+ cAutomath_Syntax.AddRule("set_life_lost_message","set_life_lost_message(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
+ cAutomath_Syntax.AddRule("set_life_lost_message(","set_life_lost_message(N",CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("set_life_lost_message(N","set_life_lost_message(N,",CLexeme::ID_LEXEME_TYPE_COMMA,CLexeme::ID_LEXEME_TYPE_COMMA,false);
+ cAutomath_Syntax.AddRule("set_life_lost_message(N,","set_life_lost_message(N,N",CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("set_life_lost_message(N,N","set_life_lost_message(N,N,",CLexeme::ID_LEXEME_TYPE_COMMA,CLexeme::ID_LEXEME_TYPE_COMMA,false);
+ cAutomath_Syntax.AddRule("set_life_lost_message(N,N,","set_life_lost_message(N,N,`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
+ cAutomath_Syntax.AddRule("set_life_lost_message(N,N,`A`","set_life_lost_message(N,N,`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
+
+ //команда SetGameOverMessage(20,100,"СООБЩЕНИЕ")
+ cAutomath_Syntax.AddRule("begin","set_game_over_message",ID_LEXEME_TYPE_SET_GAME_OVER_MESSAGE,ID_LEXEME_TYPE_SET_GAME_OVER_MESSAGE,false);
+ cAutomath_Syntax.AddRule("set_game_over_message","set_game_over_message(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
+ cAutomath_Syntax.AddRule("set_game_over_message(","set_game_over_message(N",CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("set_game_over_message(N","set_game_over_message(N,",CLexeme::ID_LEXEME_TYPE_COMMA,CLexeme::ID_LEXEME_TYPE_COMMA,false);
+ cAutomath_Syntax.AddRule("set_game_over_message(N,","set_game_over_message(N,N",CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("set_game_over_message(N,N","set_game_over_message(N,N,",CLexeme::ID_LEXEME_TYPE_COMMA,CLexeme::ID_LEXEME_TYPE_COMMA,false);
+ cAutomath_Syntax.AddRule("set_game_over_message(N,N,","set_game_over_message(N,N,`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
+ cAutomath_Syntax.AddRule("set_game_over_message(N,N,`A`","set_game_over_message(N,N,`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
 
  vector_CLexeme.clear();
  Mode=MODE_WAIT_COMMAND;
@@ -479,6 +503,38 @@ bool CSyntaxAnalyzer::ModeWaitCommand(const CLexeme &cLexeme_Command,int32_t lin
   int32_t offset_x=atoi(offset_x_str.c_str());
   int32_t offset_y=atoi(offset_y_str.c_str());
   CopyPosition(name_first,name_second,offset_x,offset_y,cGameState.Map);
+  CommandLexeme.clear();
+  return(true);
+ }
+
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_SET_LIFE_LOST_MESSAGE)
+ {
+  if (CommandLexeme.size()==0) return(true);
+  std::string message;
+  CommandLexeme[0][6].GetName(message);
+  std::string x_pos;
+  CommandLexeme[0][2].GetName(x_pos);
+  std::string y_pos;
+  CommandLexeme[0][4].GetName(y_pos);
+  int32_t x=atoi(x_pos.c_str());
+  int32_t y=atoi(y_pos.c_str());
+  cGameState.SetLifeLostMessage(message,x,y);
+  CommandLexeme.clear();
+  return(true);
+ }
+
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_SET_GAME_OVER_MESSAGE)
+ {
+  if (CommandLexeme.size()==0) return(true);
+  std::string message;
+  CommandLexeme[0][6].GetName(message);
+  std::string x_pos;
+  CommandLexeme[0][2].GetName(x_pos);
+  std::string y_pos;
+  CommandLexeme[0][4].GetName(y_pos);
+  int32_t x=atoi(x_pos.c_str());
+  int32_t y=atoi(y_pos.c_str());
+  cGameState.SetGameOverMessage(message,x,y);
   CommandLexeme.clear();
   return(true);
  }
@@ -871,10 +927,13 @@ std::shared_ptr<IConditionalExpression> CSyntaxAnalyzer::CreateConditional(void)
     iAction_Ptr=CreateAction(CommandLexeme[n],iAction_Ptr);
    }
   }
+  std::string divider_str;
+  CommandLexeme[0][2].GetName(divider_str);
+  int32_t divider=atoi(divider_str.c_str());
+  if (divider==0) divider=1;
   std::string name;
-  CommandLexeme[0][2].GetName(name);
-
-  return(std::shared_ptr<IConditionalExpression>(new CConditionalOfTimer(name,iAction_Ptr)));
+  CommandLexeme[0][4].GetName(name);
+  return(std::shared_ptr<IConditionalExpression>(new CConditionalOfTimer(divider,name,iAction_Ptr)));
  }
 
  if (CommandLexeme[0][0].GetType()==ID_LEXEME_TYPE_IF_USE)

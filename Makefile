@@ -1,11 +1,56 @@
 TARGET = Dizzy
-OBJS =csyntaxanalyzer.o cgame.o cvideo_software.o csprite.o clexicalanalyzer.o tga.o cpart.o ctilessequence.o cdizzy.o system.o cfontprinter.o cgamestate.o cautomath.o cconditionalofuse.o cconditionalofintersection.o main.o cconditionalofnotdizzyintersection.o cconditionalofdizzyintersection.o cconditionalofpickup.o cactioncopypositionoffset.o cactioncopyposition.o clexeme.o cconditionaloftimer.o cactionchangedescriptionglobal.o cactionchangenameglobal.o ctile.o cactionchangeanimationmode.o cactionmessage.o cactionchangedescription.o cactionsetenabled.o cactionchangeposition.o cactionsetanimationstep.o cactionenergyupdate.o cactionchangename.o cactionmove.o cactionaddscore.o cactionsingle.o cactionpickup.o cactionadditem.o cactionaddlife.o ivideo.o ipart.o iconditionalexpression.o craiifileout.o craiifilein.o iaction.o
-INCDIR = 
+OBJS =cactionadditem.o \
+cactionaddlife.o \
+cactionaddscore.o \
+cactionchangeanimationmode.o  \
+cactionchangedescription.o \
+cactionchangedescriptionglobal.o \
+cactionchangename.o \
+cactionchangenameglobal.o \
+cactionchangeposition.o \
+cactioncopyposition.o \
+cactioncopypositionoffset.o \
+cactionenergyupdate.o \
+cactionmessage.o \
+cactionmove.o \
+cactionpickup.o \
+cactionsetanimationstep.o \
+cactionsetenabled.o \
+cactionsingle.o \
+cautomath.o \
+cconditionalofdizzyintersection.o \
+cconditionalofintersection.o \
+cconditionalofnotdizzyintersection.o \
+cconditionalofpickup.o \
+cconditionaloftimer.o \
+cconditionalofuse.o \
+cdizzy.o \
+cfontprinter.o \
+cgame.o \
+cgamestate.o \
+clexeme.o \
+clexicalanalyzer.o \
+cpart.o \
+craiifilein.o \
+craiifileout.o \
+csprite.o \
+csyntaxanalyzer.o \
+ctile.o \
+ctilessequence.o \
+iaction.o \
+iconditionalexpression.o \
+ipart.o \
+ivideo.o \
+system.o \
+tga.o \
+cvideo_software.o \
+main.o
+INCDIR =
 CFLAGS = -O3 -G0 -Wall -std=c++11
-CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti 
+CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
-LIBDIR = 
-LDFLAGS = 
+LIBDIR =
+LDFLAGS =
 LIBS =-lpspgum -lpspgu -lm -lstdc++ -lpspaudiolib -lpspaudio -lpsprtc
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = Dizzy

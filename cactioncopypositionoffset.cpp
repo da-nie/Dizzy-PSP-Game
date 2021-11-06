@@ -23,7 +23,7 @@
 //конструктор
 //----------------------------------------------------------------------------------------------------
 CActionCopyPositionOffset::CActionCopyPositionOffset(const std::string &name_one,const std::string &name_two,int32_t offset_x,int32_t offset_y,std::shared_ptr<IAction> iAction_Ptr)
-{
+{ 
  Name_One=name_one;
  Name_Two=name_two;
  OffsetX=offset_x;
@@ -65,11 +65,11 @@ void CActionCopyPositionOffset::Execute(std::shared_ptr<IPart> iPart_Ptr,CGameSt
   if (cGameState.MapNamed[n]->Name.compare(Name_Two)==0) part_two_ptr=cGameState.MapNamed[n];
  }
  if (part_one_ptr.get()!=NULL && part_two_ptr.get()!=NULL)//выполняем замену координат
- {
+ {  
   part_one_ptr->BlockPosX=part_two_ptr->BlockPosX+OffsetX;
   part_one_ptr->BlockPosY=part_two_ptr->BlockPosY+OffsetY;
  }
- if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Execute(iPart_Ptr,cGameState);
+ if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Execute(iPart_Ptr,cGameState);	
 }
 //----------------------------------------------------------------------------------------------------
 //инициализация

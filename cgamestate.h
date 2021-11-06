@@ -44,15 +44,52 @@ class CGameState
    int32_t InSymbolHeight;//высота в символах
    std::vector<std::string> Message;//выводимые сообщения
   };
+
+  //структура узла квадратичного дерева
+  struct SQuadricTree
+  {
+   //указатели на поддеревья
+   std::shared_ptr<SQuadricTree> LeftTop_Ptr;//левое верхнее поддерево
+   std::shared_ptr<SQuadricTree> LeftBottom_Ptr;//левое нижнее поддерево
+   std::shared_ptr<SQuadricTree> RightTop_Ptr;//правое верхнее поддерево
+   std::shared_ptr<SQuadricTree> RightBottom_Ptr;//правое нижнее поддерево
+
+   //центр
+   int32_t CenterX;
+   int32_t CenterY;
+
+   //описывающий прямоугольник
+   int32_t Left;
+   int32_t Right;
+   int32_t Top;
+   int32_t Bottom;
+   //элементы листа
+   std::vector<std::shared_ptr<IPart>> LeafItem;//элементы листа
+  };
+
+  //структура для обхода дерева карты
+  struct SVisitTree
+  {
+   //прямоугольник экрана
+   int32_t ScreenLeft;
+   int32_t ScreenRight;
+   int32_t ScreenTop;
+   int32_t ScreenBottom;
+
+   std::function<void(std::shared_ptr<IPart>)> callback_function;//функция обратного вызова для листа
+  };
+
   //-константы------------------------------------------------------------------------------------------
   static const int32_t ENERGY_MAX_VALUE=100;//максимальное значение энергии
   static const int32_t MAX_DIZZY_LIFE=3;//максимальное количество жизней Диззи
-  //-переменные-----------------------------------------------------------------------------------------
+  //-переменные-----------------------------------------------------------------------------------------  
   std::vector<std::shared_ptr<IPart> > Take;//предметы, которые можно взять
   std::vector<std::shared_ptr<IPart> > Inventory;//интвентарь
   std::shared_ptr<IPart> UsedObject;//используемый предмет
   std::vector<std::shared_ptr<IPart> > Map;//карта
   std::vector<std::shared_ptr<IPart> > MapNamed;//именованые блоки карты
+
+  std::shared_ptr<SQuadricTree> QuadricTree_Ptr;//квадратичное дерево карты
 
   std::vector<SMessage> Message;//список сообщений
 
@@ -71,13 +108,17 @@ class CGameState
   int32_t DizzyStartPositionX;//координата X начальной позиции Диззи
   int32_t DizzyStartPositionY;//координата Y начальной позиции Диззи
 
+  int32_t X;//координаты Диззи на экране
+  int32_t Y;
+
   int32_t Map_X;//координаты левого верхнего угла карты
   int32_t Map_Y;
 
-  int32_t X;//координаты Диззи на экране
-  int32_t Y;
+
+  SMessage sMessage_GameOver;//сообщение о конце игры
+  SMessage sMessage_LifeLost;//сообщение о потеряной жизни
  private:
-  //-переменные-----------------------------------------------------------------------------------------
+  //-переменные-----------------------------------------------------------------------------------------  
  public:
   //-конструктор----------------------------------------------------------------------------------------
   CGameState(void);
@@ -87,15 +128,20 @@ class CGameState
   //-открытые функции-----------------------------------------------------------------------------------
   void ClearTake(void);//очистить список возможных для взятия объектов
   void AddTake(std::shared_ptr<IPart> iPart_Ptr);//добавить объект в список возможных для взятия
+  SMessage CreateMessage(const std::string &message,int32_t screen_x,int32_t screen_y);//создать сообщение
   void AddMessage(const std::string &message,int32_t screen_x,int32_t screen_y);//добавить сообщение
+  void AddMessageLifeLost(void);//добавить сообщение о потере жизни
+  void AddMessageGameOver(void);//добавить сообщение о завершении игры
+  void SetLifeLostMessage(const std::string &message,int32_t screen_x,int32_t screen_y);//задать сообщение о потере жизни
+  void SetGameOverMessage(const std::string &message,int32_t screen_x,int32_t screen_y);//задать сообщение о завершении игры
   void EnergyUpdate(int32_t d_energy);//выполнить изменение энергии Диззи
   void AddScore(int32_t d_score);//добавить очки Диззи
   void AddLife(void);//добавить жизнь Диззи
   void AddItem(void);//добавить найденный предмет Диззи
   void SetDizzyStartPosition(int32_t x,int32_t y);//задать стартовую позицию Диззи
-  void Init(void);//инициализация игры
+  void Init(void);//инициализация игры    
  private:
-  //-закрытые функции-----------------------------------------------------------------------------------
+  //-закрытые функции-----------------------------------------------------------------------------------  
 };
 
 #endif
