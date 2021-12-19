@@ -2,10 +2,10 @@
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Release" />
 	<File name="cgame.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="50031" topLine="1079" />
+		<Cursor position="1544" topLine="0" />
 	</File>
 	<File name="cgame.h" open="0" top="0" tabpos="0">
-		<Cursor position="2320" topLine="34" />
+		<Cursor position="10171" topLine="115" />
 	</File>
 	<File name="csprite.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="3221" topLine="40" />
